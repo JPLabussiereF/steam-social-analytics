@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: steam-social-analytics
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/steam_analytics
+    username: steam_user
+    password: steam_password
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc.batch_size: 25
+        order_inserts: true
+        order_updates: true
+    show-sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          steam:
+            client-id: steam
+            client-secret: not-used
+            scope: openid
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8080/login/oauth2/code/steam"
+        provider:
+          steam:
+            authorization-uri: https://steamcommunity.com/openid/login
+            token-uri: https://steamcommunity.com/openid/login
+            user-info-uri: https://steamcommunity.com/openid/login
+            user-name-attribute: claimed_id
+
+steam:
+  api:
+    key: ${STEAM_API_KEY:YOUR_STEAM_API_KEY_HERE}
+    base-url: https://api.steampowered.com
+    rate-limit:
+      global: 100000
+      per-user: 1
+
+logging:
+  level:
+    com.steamanalytics: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+server:
+  port: 8080
